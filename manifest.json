@@ -9,6 +9,14 @@
         "imageUrl": "https://repo.jellyfin.org/releases/plugin/images/jellyfin-plugin-playbackreporting.png",
         "versions": [
             {
+                "version": "19.0.0.4",
+                "changelog": "34b4ba2010c7725e89821f2d8a64985ecffd2cfa\n- fix duplicate rows when a playback is started twice within 20s\n- fix time being saved as DateTime.MinValue\n- fix fork release building against minium abi\n- add fork release ci job\n- Bump version to 19\n- fix tfm\n- [build-failing] Update Jellyfin NuGet packages to latest preview\n- Update targetAbi to 10.12.0.0\n- Update Jellyfin NuGet packages to latest preview\n- fix build",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://raw.githubusercontent.com/painerp/jellyfin-plugin-playbackreporting/manifest/playback-reporting-painerp/playback-reporting-painerp_19.0.0.4.zip",
+                "checksum": "e63edd28285d96e1be77a92ae6430750",
+                "timestamp": "2026-10-21T23:54:30Z"
+            },
+            {
                 "version": "19.0.0.3",
                 "changelog": "367a8b2ad20b594131e902e9739b0bb2ac5d4756\n- fix time being saved as DateTime.MinValue\n- fix fork release building against minium abi\n- add fork release ci job\n- Bump version to 19\n- fix tfm\n- [build-failing] Update Jellyfin NuGet packages to latest preview\n- Update targetAbi to 10.12.0.0\n- Update Jellyfin NuGet packages to latest preview\n- fix build\n- Redesign pages, add CSS where it is missing (#111)",
                 "targetAbi": "12.0.0.0",
