@@ -74,6 +74,11 @@ jobs:
           sed -i -E "s/(Guid Id => new Guid\(\")[^\"]+/\1$PLUGIN_GUID/; s/(string Name => \")[^\"]+/\1$PLUGIN_NAME/" "$plugin_cs"
           grep -qF "$PLUGIN_GUID" "$plugin_cs" && grep -qF "\"$PLUGIN_NAME\"" "$plugin_cs"
 
+          csproj=Jellyfin.Plugin.PlaybackReporting/Jellyfin.Plugin.PlaybackReporting.csproj
+          abi="$(yq .targetAbi build.yaml | cut -d. -f1-3)"
+          sed -i -E "s/(Include=\"Jellyfin\.(Data|Controller)\" Version=\")[^\"]+/\1$abi/" "$csproj"
+          [ "$(grep -cF "Version=\"$abi\"" "$csproj")" = 2 ]
+
           export CHANGELOG="$(git rev-parse HEAD)"$'\n'"$(git log --no-merges --format='- %s' -10)"
           yq -i '.guid = strenv(PLUGIN_GUID) | .name = strenv(PLUGIN_NAME) | .owner = "painerp" | .changelog = strenv(CHANGELOG)' build.yaml
           version="$(yq .version build.yaml | cut -d. -f1).0.0.${{ github.run_number }}"
