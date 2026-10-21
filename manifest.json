@@ -9,6 +9,14 @@
         "imageUrl": "https://repo.jellyfin.org/releases/plugin/images/jellyfin-plugin-playbackreporting.png",
         "versions": [
             {
+                "version": "19.0.0.3",
+                "changelog": "367a8b2ad20b594131e902e9739b0bb2ac5d4756\n- fix time being saved as DateTime.MinValue\n- fix fork release building against minium abi\n- add fork release ci job\n- Bump version to 19\n- fix tfm\n- [build-failing] Update Jellyfin NuGet packages to latest preview\n- Update targetAbi to 10.12.0.0\n- Update Jellyfin NuGet packages to latest preview\n- fix build\n- Redesign pages, add CSS where it is missing (#111)",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://raw.githubusercontent.com/painerp/jellyfin-plugin-playbackreporting/manifest/playback-reporting-painerp/playback-reporting-painerp_19.0.0.3.zip",
+                "checksum": "47149c634416ca716b490b29d8e7ad44",
+                "timestamp": "2026-10-21T23:15:18Z"
+            },
+            {
                 "version": "19.0.0.2",
                 "changelog": "5e17f7addc4c769793f83ea583fc5d85ab4455d6\n- fix fork release building against minium abi\n- add fork release ci job\n- Bump version to 19\n- fix tfm\n- [build-failing] Update Jellyfin NuGet packages to latest preview\n- Update targetAbi to 10.12.0.0\n- Update Jellyfin NuGet packages to latest preview\n- fix build\n- Redesign pages, add CSS where it is missing (#111)\n- Remove unsafe SQLite reconfiguration (#139)",
                 "targetAbi": "12.0.0.0",
