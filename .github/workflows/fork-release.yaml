@@ -1,0 +1,89 @@
+# Fork pipeline: merge upstream, build under our own plugin id, publish to the
+# Jellyfin plugin repository on the `manifest` branch.
+#
+# Jellyfin repository URL:
+#   https://raw.githubusercontent.com/painerp/jellyfin-plugin-playbackreporting/manifest/manifest.json
+name: 'Fork Release'
+
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fork-release
+
+env:
+  UPSTREAM: https://github.com/jellyfin/jellyfin-plugin-playbackreporting.git
+  PLUGIN_GUID: 30b95fe8-bb70-4a32-9bfd-822038c4024d
+  PLUGIN_NAME: Playback Reporting (painerp)
+  REPO_URL: https://raw.githubusercontent.com/${{ github.repository }}/manifest
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Merge Upstream
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch "$UPSTREAM" master
+          git merge --no-edit FETCH_HEAD
+          git push origin HEAD:master
+
+      - name: Check For Unreleased Commit
+        id: check
+        run: |
+          dir="$RUNNER_TEMP/manifest"
+          if git fetch origin manifest; then
+            git worktree add "$dir" FETCH_HEAD
+          else
+            git worktree add --orphan -b manifest "$dir"
+            echo '[]' > "$dir/manifest.json"
+          fi
+          if grep -qF "$(git rev-parse HEAD)" "$dir/manifest.json"; then
+            echo "HEAD already released, nothing to do"
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "dotnet=$(yq .framework build.yaml | sed 's/^net//').x" >> "$GITHUB_OUTPUT"
+
+      - name: Setup .NET
+        if: steps.check.outputs.new == 'true'
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: ${{ steps.check.outputs.dotnet }}
+
+      - name: Build And Publish
+        if: steps.check.outputs.new == 'true'
+        run: |
+          plugin_cs=Jellyfin.Plugin.PlaybackReporting/Plugin.cs
+          sed -i -E "s/(Guid Id => new Guid\(\")[^\"]+/\1$PLUGIN_GUID/; s/(string Name => \")[^\"]+/\1$PLUGIN_NAME/" "$plugin_cs"
+          grep -qF "$PLUGIN_GUID" "$plugin_cs" && grep -qF "\"$PLUGIN_NAME\"" "$plugin_cs"
+
+          export CHANGELOG="$(git rev-parse HEAD)"$'\n'"$(git log --no-merges --format='- %s' -10)"
+          yq -i '.guid = strenv(PLUGIN_GUID) | .name = strenv(PLUGIN_NAME) | .owner = "painerp" | .changelog = strenv(CHANGELOG)' build.yaml
+          version="$(yq .version build.yaml | cut -d. -f1).0.0.${{ github.run_number }}"
+
+          pipx install jprm==1.1.0
+          mkdir -p "$RUNNER_TEMP/artifacts"
+          zip=$(jprm --verbosity=info plugin build . -o "$RUNNER_TEMP/artifacts" -v "$version")
+          jprm --verbosity=info repo add --url "$REPO_URL" "$RUNNER_TEMP/manifest/manifest.json" "$zip"
+
+          cd "$RUNNER_TEMP/manifest"
+          git add -A
+          git commit -m "Release $version"
+          git push origin HEAD:manifest
