@@ -100,7 +100,9 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
                 {
                     events.Add(e);
                 }
-                KeyValuePair<DateTime, ActionType> stop_event = new KeyValuePair<DateTime, ActionType>(LastUpdated, ActionType.STOP);
+                // LastUpdated is still DateTime.MinValue if no progress report came in, never stop before the last event
+                DateTime stop_time = LastUpdated > event_tracking[^1].Key ? LastUpdated : event_tracking[^1].Key;
+                KeyValuePair<DateTime, ActionType> stop_event = new KeyValuePair<DateTime, ActionType>(stop_time, ActionType.STOP);
                 events.Add(stop_event);
             }
             else
