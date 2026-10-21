@@ -174,11 +174,11 @@ namespace Jellyfin.Plugin.PlaybackReporting
 
             // start a task to report playback started
             _logger.LogInformation("Creating StartPlaybackTimer Task");
-            Task.Run(() => StartPlaybackTimer(e));
+            Task.Run(() => StartPlaybackTimer(e, tracker));
 
         }
 
-        public async Task StartPlaybackTimer(PlaybackProgressEventArgs e)
+        public async Task StartPlaybackTimer(PlaybackProgressEventArgs e, PlaybackTracker tracker)
         {
             _logger.LogInformation("StartPlaybackTimer : Entered");
             await Task.Delay(20000);
@@ -264,10 +264,10 @@ namespace Jellyfin.Plugin.PlaybackReporting
 
                         // update tracker with playback info
                         string key = e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item?.Id.ToString("N");
-                        if (playback_trackers != null && playback_trackers.ContainsKey(key))
+                        // only the tracker of this start, a quick second start replaces it and records the playback itself
+                        if (playback_trackers != null && playback_trackers.TryGetValue(key, out PlaybackTracker? current) && current == tracker)
                         {
                             _logger.LogInformation("Playback tracker found, adding playback info : {Key}", key);
-                            PlaybackTracker tracker = playback_trackers[key];
                             tracker.TrackedPlaybackInfo = play_info;
 
                             _logger.LogInformation("Saving playback tracking activity in DB");
@@ -275,7 +275,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
                         }
                         else
                         {
-                            _logger.LogInformation("Playback trackler not found : {Key}", key);
+                            _logger.LogInformation("Playback tracker not found or replaced by a newer start : {Key}", key);
                         }
                     }
                     else
