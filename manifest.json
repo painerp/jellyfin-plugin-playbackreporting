@@ -6,7 +6,16 @@
         "overview": "Collect and show user play statistics",
         "owner": "painerp",
         "category": "Administration",
+        "imageUrl": "https://repo.jellyfin.org/releases/plugin/images/jellyfin-plugin-playbackreporting.png",
         "versions": [
+            {
+                "version": "19.0.0.2",
+                "changelog": "5e17f7addc4c769793f83ea583fc5d85ab4455d6\n- fix fork release building against minium abi\n- add fork release ci job\n- Bump version to 19\n- fix tfm\n- [build-failing] Update Jellyfin NuGet packages to latest preview\n- Update targetAbi to 10.12.0.0\n- Update Jellyfin NuGet packages to latest preview\n- fix build\n- Redesign pages, add CSS where it is missing (#111)\n- Remove unsafe SQLite reconfiguration (#139)",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://raw.githubusercontent.com/painerp/jellyfin-plugin-playbackreporting/manifest/playback-reporting-painerp/playback-reporting-painerp_19.0.0.2.zip",
+                "checksum": "0abaeea01891d5562c2b1823f84f4ca1",
+                "timestamp": "2026-10-21T23:03:08Z"
+            },
             {
                 "version": "19.0.0.1",
                 "changelog": "b41657d00227d2f9d18e75cd8e17226d028a0eb1\n- add fork release ci job\n- Bump version to 19\n- fix tfm\n- [build-failing] Update Jellyfin NuGet packages to latest preview\n- Update targetAbi to 10.12.0.0\n- Update Jellyfin NuGet packages to latest preview\n- fix build\n- Redesign pages, add CSS where it is missing (#111)\n- Remove unsafe SQLite reconfiguration (#139)\n- Fix URL parameter name for loading backup file (#138)",
@@ -15,7 +24,6 @@
                 "checksum": "ea51bfe9197c97b4e97da528574787e4",
                 "timestamp": "2026-10-21T22:52:13Z"
             }
-        ],
-        "imageUrl": "https://repo.jellyfin.org/releases/plugin/images/jellyfin-plugin-playbackreporting.png"
+        ]
     }
 ]
