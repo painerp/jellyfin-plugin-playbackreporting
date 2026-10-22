@@ -110,7 +110,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
                     {
                         _defaultWal = db.Query("PRAGMA journal_mode").SelectScalarString().First();
 
-                        Logger.LogInformation("Default journal_mode for {0} is {1}", DbFilePath, _defaultWal);
+                        Logger.LogDebug("Default journal_mode for {0} is {1}", DbFilePath, _defaultWal);
                     }
 
                     var queries = new List<string>

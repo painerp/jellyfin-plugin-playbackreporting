@@ -58,7 +58,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
             _config = config;
             _userManager = userManager;
 
-            _logger.LogInformation("PlaybackReportingActivityController Loaded");
+            _logger.LogDebug("PlaybackReportingActivityController Loaded");
             var repo = new ActivityRepository(loggerFactory.CreateLogger<ActivityRepository>(), _config.ApplicationPaths, _fileSystem);
             //repo.Initialize();
             _repository = repo;
