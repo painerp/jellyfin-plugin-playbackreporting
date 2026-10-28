@@ -66,7 +66,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
                 try
                 {
                     PlaybackTracker tracker = playback_trackers[key];
-                    DateTime now = DateTime.Now;
+                    DateTime now = DateTime.UtcNow;
                     if (now.Subtract(tracker.LastUpdated).TotalSeconds > 20) // update every 20 seconds
                     {
                         tracker.LastUpdated = now;

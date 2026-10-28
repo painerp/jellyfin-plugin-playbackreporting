@@ -27,6 +27,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         public PlaybackInfo? TrackedPlaybackInfo { set; get; }
         private readonly ILogger<PlaybackTracker> _logger;
         private readonly List<KeyValuePair<DateTime, ActionType>> event_tracking = new List<KeyValuePair<DateTime, ActionType>>();
+        // tracker times are UTC so a play across a DST change keeps its duration, DateCreated in the DB stays local
         public DateTime LastUpdated = DateTime.MinValue;
 
         private enum ActionType { START, STOP, PAUSE, UNPAUSE, NONE }
@@ -44,12 +45,12 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
                 KeyValuePair<DateTime, ActionType> play_event;
                 if (e.IsPaused)
                 {
-                    play_event = new KeyValuePair<DateTime, ActionType>(DateTime.Now, ActionType.PAUSE);
+                    play_event = new KeyValuePair<DateTime, ActionType>(DateTime.UtcNow, ActionType.PAUSE);
                     event_log.Add("PauseEvent(" + play_event.Key + ")");
                 }
                 else
                 {
-                    play_event = new KeyValuePair<DateTime, ActionType>(DateTime.Now, ActionType.UNPAUSE);
+                    play_event = new KeyValuePair<DateTime, ActionType>(DateTime.UtcNow, ActionType.UNPAUSE);
                     event_log.Add("UnPaused Event(" + play_event.Key + ")");
                 }
                 event_tracking.Add(play_event);
@@ -65,7 +66,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         public void ProcessStart(PlaybackProgressEventArgs e)
         {
             IsPaused = e.IsPaused;
-            KeyValuePair<DateTime, ActionType> play_event = new KeyValuePair<DateTime, ActionType>(DateTime.Now, ActionType.START);
+            KeyValuePair<DateTime, ActionType> play_event = new KeyValuePair<DateTime, ActionType>(DateTime.UtcNow, ActionType.START);
             event_tracking.Add(play_event);
             _logger.LogInformation("PlaybackTracker : Adding Start Event : {PlayEventKey}", play_event.Key);
         }
@@ -73,7 +74,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         public List<string> ProcessStop(PlaybackStopEventArgs e)
         {
             IsPaused = e.IsPaused;
-            KeyValuePair<DateTime, ActionType> play_event = new KeyValuePair<DateTime, ActionType>(DateTime.Now, ActionType.STOP);
+            KeyValuePair<DateTime, ActionType> play_event = new KeyValuePair<DateTime, ActionType>(DateTime.UtcNow, ActionType.STOP);
             event_tracking.Add(play_event);
             _logger.LogInformation("PlaybackTracker : Adding Stop Event : {PlayEventKey}", play_event.Key);
 
@@ -112,7 +113,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             eventLog.Add("EventCount(" + events.Count + ")");
 
-            KeyValuePair<DateTime, ActionType> prev_event = new KeyValuePair<DateTime, ActionType>(DateTime.Now, ActionType.NONE);
+            KeyValuePair<DateTime, ActionType> prev_event = new KeyValuePair<DateTime, ActionType>(DateTime.UtcNow, ActionType.NONE);
 
             foreach (KeyValuePair<DateTime, ActionType> e in events)
             {
