@@ -24,6 +24,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
     public class PlaybackTracker
     {
         private bool IsPaused;
+        private long? RunTimeTicks;
         public PlaybackInfo? TrackedPlaybackInfo { set; get; }
         private readonly ILogger<PlaybackTracker> _logger;
         private readonly List<KeyValuePair<DateTime, ActionType>> event_tracking = new List<KeyValuePair<DateTime, ActionType>>();
@@ -66,6 +67,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         public void ProcessStart(PlaybackProgressEventArgs e)
         {
             IsPaused = e.IsPaused;
+            RunTimeTicks = e.Item?.RunTimeTicks;
             KeyValuePair<DateTime, ActionType> play_event = new KeyValuePair<DateTime, ActionType>(DateTime.UtcNow, ActionType.START);
             event_tracking.Add(play_event);
             _logger.LogInformation("PlaybackTracker : Adding Start Event : {PlayEventKey}", play_event.Key);
@@ -132,6 +134,12 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
                     }
                 }
                 prev_event = e;
+            }
+
+            // clients that never report a stop can keep a play running for days, never count more than the item runtime
+            if (RunTimeTicks > 0)
+            {
+                duration = (int)Math.Min(duration, RunTimeTicks.Value / TimeSpan.TicksPerSecond);
             }
 
             eventLog.Add("Total(" + duration + ")");
