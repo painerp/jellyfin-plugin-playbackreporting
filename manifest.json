@@ -9,6 +9,14 @@
         "imageUrl": "https://repo.jellyfin.org/releases/plugin/images/jellyfin-plugin-playbackreporting.png",
         "versions": [
             {
+                "version": "19.0.0.22",
+                "changelog": "8e951397cdb40e993eceecd244a1de5d04f3d853\n- fix tracker loss and failed requests when the database is locked\n- cap playback duration at the item runtime\n- fix negative and hour off durations for plays across a DST change\n- move loaded and default journal mode message to be debug only\n- fix duplicate rows when a playback is started twice within 20s\n- fix time being saved as DateTime.MinValue\n- fix fork release building against minium abi\n- add fork release ci job\n- Bump version to 19\n- fix tfm",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://raw.githubusercontent.com/painerp/jellyfin-plugin-playbackreporting/manifest/playback-reporting-painerp/playback-reporting-painerp_19.0.0.22.zip",
+                "checksum": "319f35ccd72f9d1153bf3248e0818209",
+                "timestamp": "2026-11-05T21:55:13Z"
+            },
+            {
                 "version": "19.0.0.13",
                 "changelog": "7bec72bc4f38fa4adf0d582732f9a0541e32e122\n- cap playback duration at the item runtime\n- fix negative and hour off durations for plays across a DST change\n- move loaded and default journal mode message to be debug only\n- fix duplicate rows when a playback is started twice within 20s\n- fix time being saved as DateTime.MinValue\n- fix fork release building against minium abi\n- add fork release ci job\n- Bump version to 19\n- fix tfm\n- [build-failing] Update Jellyfin NuGet packages to latest preview",
                 "targetAbi": "12.0.0.0",
