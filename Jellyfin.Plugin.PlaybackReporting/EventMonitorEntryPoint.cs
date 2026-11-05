@@ -63,34 +63,39 @@ namespace Jellyfin.Plugin.PlaybackReporting
             string key = e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item?.Id.ToString("N");
             if (playback_trackers != null && playback_trackers.ContainsKey(key))
             {
-                try
+                PlaybackTracker tracker = playback_trackers[key];
+                DateTime now = DateTime.UtcNow;
+                if (now.Subtract(tracker.LastUpdated).TotalSeconds > 20) // update every 20 seconds
                 {
-                    PlaybackTracker tracker = playback_trackers[key];
-                    DateTime now = DateTime.UtcNow;
-                    if (now.Subtract(tracker.LastUpdated).TotalSeconds > 20) // update every 20 seconds
+                    tracker.LastUpdated = now;
+                    _logger.LogInformation("Processing playback tracker : {Key}", key);
+                    List<string> event_log = tracker.ProcessProgress(e);
+                    if (event_log.Count > 0)
                     {
-                        tracker.LastUpdated = now;
-                        _logger.LogInformation("Processing playback tracker : {Key}", key);
-                        List<string> event_log = tracker.ProcessProgress(e);
-                        if (event_log.Count > 0)
-                        {
-                            _logger.LogDebug("ProcessProgress : {Events}", string.Join("", event_log));
-                        }
-                        if (tracker.TrackedPlaybackInfo != null)
-                        {
-                            _repository?.UpdatePlaybackAction(tracker.TrackedPlaybackInfo);
-                        }
+                        _logger.LogDebug("ProcessProgress : {Events}", string.Join("", event_log));
                     }
-                }
-                catch (Exception exp)
-                {
-                    playback_trackers.Remove(key);
-                    throw new Exception("Error saving playback state: " + exp.Message);
+                    if (tracker.TrackedPlaybackInfo != null)
+                    {
+                        SavePlaybackAction(tracker.TrackedPlaybackInfo);
+                    }
                 }
             }
             else
             {
                 _logger.LogDebug("Playback progress did not have a tracker : {Key}", key);
+            }
+        }
+
+        // a failed save must not cost the tracker or fail the client's request, the next save writes the whole duration again
+        private void SavePlaybackAction(PlaybackInfo play_info)
+        {
+            try
+            {
+                _repository?.UpdatePlaybackAction(play_info);
+            }
+            catch (Exception exp)
+            {
+                _logger.LogError(exp, "Error saving playback state");
             }
         }
 
@@ -111,7 +116,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
                 if (tracker.TrackedPlaybackInfo != null)
                 {
                     _logger.LogInformation("Saving playback tracking activity in DB");
-                    _repository?.UpdatePlaybackAction(tracker.TrackedPlaybackInfo);
+                    SavePlaybackAction(tracker.TrackedPlaybackInfo);
                 }
                 else
                 {
@@ -160,7 +165,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
                     {
                         _logger.LogDebug("CalculateDuration : {Events}", string.Join("", event_log));
                     }
-                    _repository?.UpdatePlaybackAction(track.TrackedPlaybackInfo);
+                    SavePlaybackAction(track.TrackedPlaybackInfo);
                 }
 
                 _logger.LogInformation("Removing existing tracker : " + key);

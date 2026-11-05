@@ -106,6 +106,9 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
                 try
                 {
+                    // every repository has its own connection and WriteLock, wait for the others instead of failing
+                    db.Execute("PRAGMA busy_timeout=5000");
+
                     if (string.IsNullOrWhiteSpace(_defaultWal))
                     {
                         _defaultWal = db.Query("PRAGMA journal_mode").SelectScalarString().First();
